@@ -18,6 +18,7 @@ Work through the acceptance criteria one at a time. For each criterion:
 At the end, run all checks from the Commands section of CLAUDE.md and report the results.
 
 Rules:
+
 - Never change an existing test unless the approved plan says so.
 - Do nothing that is not in the plan. If something seems missing, stop and ask.
 - Do not commit, push or create a pull request.
