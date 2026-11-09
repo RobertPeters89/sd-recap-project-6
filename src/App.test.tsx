@@ -13,6 +13,8 @@ const artPieces: ArtPiece[] = [
     name: "Wheat Field with Cypresses",
     imageSource:
       "https://example-apis.vercel.app/assets/art/wheat-field-with-cypresses.jpg",
+    year: "1889",
+    genre: "Painting",
   },
   {
     slug: "the-starry-night",
@@ -20,6 +22,8 @@ const artPieces: ArtPiece[] = [
     name: "The Starry Night",
     imageSource:
       "https://example-apis.vercel.app/assets/art/the-starry-night.jpg",
+    year: "1889",
+    genre: "Painting",
   },
 ];
 
@@ -211,5 +215,54 @@ describe("App navigation", () => {
     renderApp("/unknown");
 
     expect(screen.getByText("Page not found")).toBeInTheDocument();
+  });
+});
+
+describe("App details", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+  });
+
+  it("shows the details of an art piece on /art-pieces/:slug", async () => {
+    renderApp("/art-pieces/the-starry-night");
+
+    expect(
+      await screen.findByRole("heading", { name: "The Starry Night" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+  });
+
+  it("shows the details after clicking an art piece in the list", async () => {
+    renderApp("/art-pieces");
+
+    await userEvent.click(
+      await screen.findByRole("link", { name: /The Starry Night/ })
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "The Starry Night" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+  });
+
+  it("shows the list again after clicking the back button", async () => {
+    renderApp("/art-pieces/the-starry-night");
+
+    await userEvent.click(await screen.findByRole("button", { name: "Back" }));
+
+    expect(await screen.findByRole("list")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Back" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows Art piece not found for an unknown slug", async () => {
+    renderApp("/art-pieces/does-not-exist");
+
+    expect(await screen.findByText("Art piece not found")).toBeInTheDocument();
   });
 });
