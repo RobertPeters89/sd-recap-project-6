@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { SWRConfig } from "swr";
 
@@ -158,5 +159,57 @@ describe("App", () => {
     expect(
       await screen.findByText("Failed to load art pieces.")
     ).toBeInTheDocument();
+  });
+});
+
+describe("App navigation", () => {
+  it.each(["/", "/art-pieces", "/unknown"])(
+    "shows the navigation exactly once on %s",
+    (route) => {
+      vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+
+      renderApp(route);
+
+      expect(screen.getAllByRole("navigation")).toHaveLength(1);
+    }
+  );
+
+  it("shows the Gallery page after clicking Gallery", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+    renderApp("/");
+    await screen.findByRole("img");
+
+    await userEvent.click(screen.getByRole("link", { name: "Gallery" }));
+
+    expect(await screen.findByRole("list")).toBeInTheDocument();
+    expect(screen.getByText("Wheat Field with Cypresses")).toBeInTheDocument();
+    expect(screen.getByText("The Starry Night")).toBeInTheDocument();
+  });
+
+  it("shows the Spotlight page after clicking Spotlight", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+    renderApp("/art-pieces");
+    await screen.findByRole("list");
+
+    await userEvent.click(screen.getByRole("link", { name: "Spotlight" }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("list")).not.toBeInTheDocument()
+    );
+    expect(screen.getAllByRole("img")).toHaveLength(1);
+  });
+
+  it("shows Page not found for an unknown URL", () => {
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+
+    renderApp("/unknown");
+
+    expect(screen.getByText("Page not found")).toBeInTheDocument();
   });
 });

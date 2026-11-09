@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router";
 import useSWR from "swr";
 
 import ArtPieces from "./components/ArtPieces";
+import Navigation from "./components/Navigation";
 import Spotlight from "./components/Spotlight";
 import { fetcher } from "./fetcher";
 import "./styles.css";
@@ -27,22 +28,26 @@ export default function App() {
   }
 
   return (
-    <main>
-      <h1>Art Gallery</h1>
-      <Routes>
-        <Route
-          path="/"
-          element={withArtPieces((pieces) => (
-            <Spotlight artPieces={pieces} />
-          ))}
-        />
-        <Route
-          path="/art-pieces"
-          element={withArtPieces((pieces) => (
-            <ArtPieces artPieces={pieces} />
-          ))}
-        />
-      </Routes>
-    </main>
+    <>
+      <main>
+        <h1>Art Gallery</h1>
+        <Routes>
+          <Route
+            path="/"
+            element={withArtPieces((pieces) => (
+              <Spotlight artPieces={pieces} />
+            ))}
+          />
+          <Route
+            path="/art-pieces"
+            element={withArtPieces((pieces) => (
+              <ArtPieces artPieces={pieces} />
+            ))}
+          />
+          <Route path="*" element={<p>Page not found</p>} />
+        </Routes>
+      </main>
+      <Navigation />
+    </>
   );
 }
