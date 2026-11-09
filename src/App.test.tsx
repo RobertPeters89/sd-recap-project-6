@@ -36,6 +36,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("App", () => {
   it("shows all art pieces on /art-pieces", async () => {
     vi.stubGlobal(
@@ -95,6 +99,55 @@ describe("App", () => {
     renderApp("/art-pieces");
 
     expect(screen.getByText("Loading...")).toBeInTheDocument();
+  });
+
+  it("shows the spotlight on /", async () => {
+    vi.spyOn(crypto, "getRandomValues").mockImplementation((array) => {
+      (array as Uint32Array)[0] = 2 ** 32 - 1;
+      return array;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+
+    renderApp("/");
+
+    const image = await screen.findByRole("img", { name: "The Starry Night" });
+    expect(image).toHaveAttribute("src", artPieces[1].imageSource);
+    expect(screen.getByText("Vincent van Gogh")).toBeInTheDocument();
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+  });
+
+  it("does not show the spotlight on /art-pieces", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+
+    renderApp("/art-pieces");
+
+    await screen.findByRole("list");
+    expect(screen.queryAllByRole("img")).toHaveLength(artPieces.length);
+    expect(screen.queryAllByRole("figure")).toHaveLength(artPieces.length);
+  });
+
+  it("shows a loading message on /", () => {
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+
+    renderApp("/");
+
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+  });
+
+  it("shows an error message on / when loading fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+
+    renderApp("/");
+
+    expect(
+      await screen.findByText("Failed to load art pieces.")
+    ).toBeInTheDocument();
   });
 
   it("shows an error message when loading fails", async () => {

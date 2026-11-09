@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import { Route, Routes } from "react-router";
 import useSWR from "swr";
 
 import ArtPieces from "./components/ArtPieces";
+import Spotlight from "./components/Spotlight";
 import { fetcher } from "./fetcher";
 import "./styles.css";
 import type { ArtPiece } from "./types";
@@ -14,18 +16,32 @@ export default function App() {
     fetcher
   );
 
-  let gallery = <p>Loading...</p>;
-  if (error) {
-    gallery = <p>Failed to load art pieces.</p>;
-  } else if (artPieces) {
-    gallery = <ArtPieces artPieces={artPieces} />;
+  function withArtPieces(render: (artPieces: ArtPiece[]) => ReactNode) {
+    if (error) {
+      return <p>Failed to load art pieces.</p>;
+    }
+    if (!artPieces) {
+      return <p>Loading...</p>;
+    }
+    return render(artPieces);
   }
 
   return (
     <main>
       <h1>Art Gallery</h1>
       <Routes>
-        <Route path="/art-pieces" element={gallery} />
+        <Route
+          path="/"
+          element={withArtPieces((pieces) => (
+            <Spotlight artPieces={pieces} />
+          ))}
+        />
+        <Route
+          path="/art-pieces"
+          element={withArtPieces((pieces) => (
+            <ArtPieces artPieces={pieces} />
+          ))}
+        />
       </Routes>
     </main>
   );
