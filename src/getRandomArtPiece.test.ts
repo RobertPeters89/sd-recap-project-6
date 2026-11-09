@@ -8,6 +8,8 @@ const artPieces: ArtPiece[] = [
     name: "Wheat Field with Cypresses",
     imageSource:
       "https://example-apis.vercel.app/assets/art/wheat-field-with-cypresses.jpg",
+    year: "1889",
+    genre: "Painting",
   },
   {
     slug: "the-starry-night",
@@ -15,12 +17,16 @@ const artPieces: ArtPiece[] = [
     name: "The Starry Night",
     imageSource:
       "https://example-apis.vercel.app/assets/art/the-starry-night.jpg",
+    year: "1889",
+    genre: "Painting",
   },
   {
     slug: "mona-lisa",
     artist: "Leonardo da Vinci",
     name: "Mona Lisa",
     imageSource: "https://example-apis.vercel.app/assets/art/mona-lisa.jpg",
+    year: "1889",
+    genre: "Painting",
   },
 ];
 
