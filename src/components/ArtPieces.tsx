@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 import type { ArtPiece } from "../types";
 import ArtPiecePreview from "./ArtPiecePreview";
 
@@ -10,7 +12,9 @@ export default function ArtPieces({ artPieces }: ArtPiecesProps) {
     <ul>
       {artPieces.map((artPiece) => (
         <li key={artPiece.slug}>
-          <ArtPiecePreview artPiece={artPiece} />
+          <Link to={`/art-pieces/${artPiece.slug}`}>
+            <ArtPiecePreview artPiece={artPiece} />
+          </Link>
         </li>
       ))}
     </ul>

@@ -9,6 +9,8 @@ const artPiece: ArtPiece = {
   name: "Wheat Field with Cypresses",
   imageSource:
     "https://example-apis.vercel.app/assets/art/wheat-field-with-cypresses.jpg",
+  year: "1889",
+  genre: "Painting",
 };
 
 describe("ArtPiecePreview", () => {
