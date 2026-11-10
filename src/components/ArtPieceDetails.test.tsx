@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 
@@ -14,6 +14,7 @@ const artPieces: ArtPiece[] = [
       "https://example-apis.vercel.app/assets/art/wheat-field-with-cypresses.jpg",
     year: "1889",
     genre: "Landscape Painting",
+    colors: ["#37412E", "#8D7332", "#838665"],
   },
   {
     slug: "mona-lisa",
@@ -22,6 +23,7 @@ const artPieces: ArtPiece[] = [
     imageSource: "https://example-apis.vercel.app/assets/art/mona-lisa.jpg",
     year: "1503",
     genre: "Portrait",
+    colors: ["#2B2118", "#8C6D4A"],
   },
 ];
 
@@ -175,6 +177,26 @@ describe("ArtPieceDetails", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add comment" }));
 
     expect(onAddComment).toHaveBeenCalledWith("mona-lisa", "Mysterious smile");
+  });
+
+  it("shows the color palette of the art piece", () => {
+    renderDetails("/art-pieces/mona-lisa");
+
+    const list = screen.getByRole("list", { name: "Color palette" });
+    const items = within(list).getAllByRole("listitem");
+    expect(items).toHaveLength(artPieces[1].colors.length);
+    artPieces[1].colors.forEach((color, index) => {
+      expect(items[index]).toHaveAccessibleName(color);
+      expect(items[index]).toHaveStyle({ backgroundColor: color });
+    });
+  });
+
+  it("does not show the colors of another art piece", () => {
+    renderDetails("/art-pieces/mona-lisa");
+
+    expect(
+      screen.queryByRole("listitem", { name: artPieces[0].colors[0] })
+    ).not.toBeInTheDocument();
   });
 
   it("shows Art piece not found for an unknown slug", () => {

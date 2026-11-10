@@ -14,6 +14,7 @@ const artPieces: ArtPiece[] = [
       "https://example-apis.vercel.app/assets/art/wheat-field-with-cypresses.jpg",
     year: "1889",
     genre: "Landscape Painting",
+    colors: ["#37412E", "#8D7332", "#838665"],
   },
   {
     slug: "the-starry-night",
@@ -23,6 +24,7 @@ const artPieces: ArtPiece[] = [
       "https://example-apis.vercel.app/assets/art/the-starry-night.jpg",
     year: "1889",
     genre: "Post-Impressionism",
+    colors: ["#2B2118", "#8C6D4A"],
   },
 ];
 

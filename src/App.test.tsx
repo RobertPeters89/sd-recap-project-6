@@ -15,6 +15,7 @@ const artPieces: ArtPiece[] = [
       "https://example-apis.vercel.app/assets/art/wheat-field-with-cypresses.jpg",
     year: "1889",
     genre: "Painting",
+    colors: ["#37412E", "#8D7332", "#838665"],
   },
   {
     slug: "the-starry-night",
@@ -24,6 +25,7 @@ const artPieces: ArtPiece[] = [
       "https://example-apis.vercel.app/assets/art/the-starry-night.jpg",
     year: "1889",
     genre: "Painting",
+    colors: ["#2B2118", "#8C6D4A"],
   },
 ];
 
@@ -233,11 +235,23 @@ describe("App details", () => {
       await screen.findByRole("heading", { name: "The Starry Night" })
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
-    const lists = screen.getAllByRole("list");
-    expect(lists).toHaveLength(1);
-    expect(screen.getByRole("region", { name: "Comments" })).toContainElement(
-      lists[0]
-    );
+    expect(screen.getAllByRole("list")).toHaveLength(2);
+    const comments = screen.getByRole("region", { name: "Comments" });
+    expect(within(comments).getByRole("list")).toBeInTheDocument();
+    expect(
+      screen.getByRole("list", { name: "Color palette" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows the color palette of the art piece on /art-pieces/:slug", async () => {
+    renderApp("/art-pieces/the-starry-night");
+
+    const list = await screen.findByRole("list", { name: "Color palette" });
+    const items = within(list).getAllByRole("listitem");
+    expect(items).toHaveLength(artPieces[1].colors.length);
+    artPieces[1].colors.forEach((color, index) => {
+      expect(items[index]).toHaveAccessibleName(color);
+    });
   });
 
   it("shows the details after clicking an art piece in the list", async () => {
