@@ -7,8 +7,8 @@ Current state: `App.tsx` keeps `artPiecesInfo: ArtPieceInfo[]` (`slug`, `isFavor
 
 ## Design
 - `types.ts`: `ArtPieceComment { text: string; date: string }` (`date` = ISO string); `ArtPieceInfo` gets `comments: ArtPieceComment[]`.
-- `App.tsx`: `getComments(slug)` (empty array if no entry) and `addComment(slug, text)` (creates the entry if missing, appends `{ text, date: new Date().toISOString() }`). `toggleFavorite` creates new entries with `comments: []`; `addComment` creates new entries with `isFavorite: false`. Both are passed to `ArtPieceDetails` only.
-- `Comments.tsx`: props `{ comments: ArtPieceComment[] }`; `<section className="comments" aria-labelledby=…>` with a heading "Comments" and a `<ul>`; each `<li>` shows the text and `<time dateTime={date}>{new Date(date).toLocaleString()}</time>`.
+- `App.tsx`: `getComments(slug)` (empty array if no entry) and `addComment(slug, text)` (creates the entry if missing, puts `{ text, date: new Date().toISOString() }` at the start of the list, so the newest comment is first). `toggleFavorite` creates new entries with `comments: []`; `addComment` creates new entries with `isFavorite: false`. Both are passed to `ArtPieceDetails` only.
+- `Comments.tsx`: props `{ comments: ArtPieceComment[] }`; `<section className="comments" aria-labelledby=…>` with a heading "Comments" and a `<ul>`; renders the comments in the stored order (newest first); each `<li>` shows the text and `<time dateTime={date}>{new Date(date).toLocaleString()}</time>`.
 - `CommentForm.tsx`: props `{ onAddComment: (text: string) => void }`; `<form className="comment-form">` with a labeled text field ("Comment", `required`) and a submit button ("Add comment"). On submit: `preventDefault`, trim, ignore if empty, otherwise call `onAddComment(trimmed)` and clear the field.
 - `ArtPieceDetails.tsx`: new props `getComments` and `onAddComment(slug, text)`; renders `Comments` and `CommentForm` below the details.
 
@@ -19,6 +19,7 @@ Test-first order: `Comments`, `CommentForm`, `ArtPieceDetails`, `App`. Fake only
 |---|---|
 | Section labeled "Comments" with a list | `Comments.test.tsx`: `getByRole("region", { name: "Comments" })` containing a list with one item per comment; `ArtPieceDetails.test.tsx`: the section is on the details page |
 | Each comment's text is displayed | `Comments.test.tsx`: text of each comment |
+| Newest comment is shown first (decision) | `Comments.test.tsx`: items appear in the given order; `App.test.tsx`: after adding two comments the second is the first list item |
 | Each comment's date and time are displayed | `Comments.test.tsx`: `<time>` with `dateTime` = stored ISO date and text = `new Date(date).toLocaleString()` |
 | Form with text field and submit button | `CommentForm.test.tsx`: labeled textbox and submit button; `ArtPieceDetails.test.tsx`: form is on the details page |
 | Submitting adds the comment to this art piece only | `CommentForm.test.tsx`: submit calls `onAddComment` with the text and clears the field; `App.test.tsx`: add a comment on piece A, it is listed with date; piece B shows none; back on A it is still there |
@@ -37,10 +38,12 @@ Also `App.test.tsx`: a comment keeps the favorite state and vice versa (toggling
 - Color palette (issue #11)
 - Configs, thresholds, lint rules, skills, `.md` files other than the plan
 
+## Decisions (answered)
+- An empty comment cannot be submitted; whitespace-only input counts as empty and the stored text is trimmed.
+- New comments are shown at the top (newest first).
+
 ## Open questions
-1. Whitespace-only input counts as empty and the stored text is trimmed. OK?
-2. Order of comments: oldest first (new comments are appended at the end). OK, or newest first?
-3. Comments are lost on reload (state only); persistence is issue #12. OK?
+- Comments are lost on reload (state only); persistence is issue #12. Assumed OK.
 
 ## Verification
 `npm run check`, `lint`, `format:check`, `test:run`, `coverage`, `build`; then `npm run dev`: open a details page, add comments, check text and date, try an empty comment, open another art piece (no comments), come back, toggle the favorite and check the comments stay.
