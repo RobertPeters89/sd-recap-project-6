@@ -32,6 +32,9 @@ Also `App.test.tsx`: a comment keeps the favorite state and vice versa (toggling
 - Create `src/components/Comments.tsx` + `Comments.test.tsx`, `src/components/CommentForm.tsx` + `CommentForm.test.tsx`.
 - Change `src/components/ArtPieceDetails.test.tsx`, `src/App.test.tsx`: new tests; in `ArtPieceDetails.test.tsx` the render helper passes the new required props (assertions unchanged, as in #8).
 
+## Change to an existing test (approved)
+`App.test.tsx` → "App details" → "shows the details of an art piece on /art-pieces/:slug": the last assertion `queryByRole("list")` not in the document no longer holds because the comments are a list. It is replaced by: exactly one list on the page and it is inside the "Comments" region (so the gallery list is still not shown). Nothing else in existing tests changes.
+
 ## Out of scope
 - Persistence in the browser (issue #12), deleting or editing comments, author names
 - Comments on Gallery, Spotlight or Favorites views
