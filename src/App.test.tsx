@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { SWRConfig } from "swr";
@@ -233,7 +233,11 @@ describe("App details", () => {
       await screen.findByRole("heading", { name: "The Starry Night" })
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
-    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    const lists = screen.getAllByRole("list");
+    expect(lists).toHaveLength(1);
+    expect(screen.getByRole("region", { name: "Comments" })).toContainElement(
+      lists[0]
+    );
   });
 
   it("shows the details after clicking an art piece in the list", async () => {
@@ -462,5 +466,122 @@ describe("App favorites page", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
     expect(screen.queryByText("The Starry Night")).not.toBeInTheDocument();
     expect(screen.getByText("Wheat Field with Cypresses")).toBeInTheDocument();
+  });
+});
+
+describe("App comments", () => {
+  const FIRST_DATE = new Date("2025-03-01T09:15:00.000Z");
+  const SECOND_DATE = new Date("2025-03-02T14:30:00.000Z");
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(FIRST_DATE);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  async function addComment(text: string) {
+    await userEvent.type(
+      await screen.findByRole("textbox", { name: "Comment" }),
+      text
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Add comment" }));
+  }
+
+  function commentItems() {
+    return within(
+      screen.getByRole("region", { name: "Comments" })
+    ).queryAllByRole("listitem");
+  }
+
+  it("shows a submitted comment with its date in the comments section", async () => {
+    renderApp("/art-pieces/the-starry-night");
+
+    await addComment("Swirling sky");
+
+    const items = commentItems();
+    expect(items).toHaveLength(1);
+    expect(items[0]).toHaveTextContent("Swirling sky");
+    expect(items[0]).toHaveTextContent(FIRST_DATE.toLocaleString());
+  });
+
+  it("shows the newest comment first", async () => {
+    renderApp("/art-pieces/the-starry-night");
+
+    await addComment("First impression");
+    vi.setSystemTime(SECOND_DATE);
+    await addComment("Second thought");
+
+    const items = commentItems();
+    expect(items).toHaveLength(2);
+    expect(items[0]).toHaveTextContent("Second thought");
+    expect(items[1]).toHaveTextContent("First impression");
+  });
+
+  it("does not add an empty comment", async () => {
+    renderApp("/art-pieces/the-starry-night");
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Add comment" })
+    );
+
+    expect(commentItems()).toHaveLength(0);
+  });
+
+  it("adds a comment only to its own art piece", async () => {
+    renderApp("/art-pieces/the-starry-night");
+    await addComment("Swirling sky");
+
+    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+    await userEvent.click(
+      await screen.findByRole("link", { name: /Wheat Field with Cypresses/ })
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Wheat Field with Cypresses" })
+    ).toBeInTheDocument();
+    expect(commentItems()).toHaveLength(0);
+    expect(screen.queryByText("Swirling sky")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+    await userEvent.click(
+      await screen.findByRole("link", { name: /The Starry Night/ })
+    );
+
+    expect(await screen.findByText("Swirling sky")).toBeInTheDocument();
+  });
+
+  it("keeps the comments when the favorite is toggled", async () => {
+    renderApp("/art-pieces/the-starry-night");
+    await addComment("Swirling sky");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Favorite The Starry Night" })
+    );
+
+    expect(commentItems()).toHaveLength(1);
+    expect(
+      screen.getByRole("button", { name: "Favorite The Starry Night" })
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("keeps the favorite when a comment is added", async () => {
+    renderApp("/art-pieces/the-starry-night");
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Favorite The Starry Night" })
+    );
+
+    await addComment("Swirling sky");
+
+    expect(
+      screen.getByRole("button", { name: "Favorite The Starry Night" })
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(commentItems()).toHaveLength(1);
   });
 });
