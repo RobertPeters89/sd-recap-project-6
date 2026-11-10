@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 
 import type { ArtPiece } from "../types";
@@ -25,10 +26,17 @@ const artPieces: ArtPiece[] = [
   },
 ];
 
-function renderArtPieces() {
+function renderArtPieces(
+  isFavorite: (slug: string) => boolean = () => false,
+  onToggleFavorite: (slug: string) => void = () => {}
+) {
   render(
     <MemoryRouter>
-      <ArtPieces artPieces={artPieces} />
+      <ArtPieces
+        artPieces={artPieces}
+        isFavorite={isFavorite}
+        onToggleFavorite={onToggleFavorite}
+      />
     </MemoryRouter>
   );
 }
@@ -53,5 +61,38 @@ describe("ArtPieces", () => {
       "/art-pieces/wheat-field-with-cypresses"
     );
     expect(links[1]).toHaveAttribute("href", "/art-pieces/the-starry-night");
+  });
+
+  it("shows a favorite button for each art piece", () => {
+    renderArtPieces();
+
+    expect(screen.getAllByRole("button", { name: "Favorite" })).toHaveLength(2);
+  });
+
+  it("marks only the favorite art pieces as pressed", () => {
+    renderArtPieces((slug) => slug === "the-starry-night");
+
+    const buttons = screen.getAllByRole("button", { name: "Favorite" });
+    expect(buttons[0]).toHaveAttribute("aria-pressed", "false");
+    expect(buttons[1]).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("toggles the favorite of the clicked art piece", async () => {
+    const onToggleFavorite = vi.fn();
+    renderArtPieces(() => false, onToggleFavorite);
+
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Favorite" })[1]
+    );
+
+    expect(onToggleFavorite).toHaveBeenCalledWith("the-starry-night");
+  });
+
+  it("does not put the favorite button inside the link", () => {
+    renderArtPieces();
+
+    for (const link of screen.getAllByRole("link")) {
+      expect(link.querySelector("button")).toBeNull();
+    }
   });
 });

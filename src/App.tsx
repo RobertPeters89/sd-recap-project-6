@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Route, Routes } from "react-router";
 import useSWR from "swr";
 
@@ -8,7 +8,7 @@ import Navigation from "./components/Navigation";
 import Spotlight from "./components/Spotlight";
 import { fetcher } from "./fetcher";
 import "./styles.css";
-import type { ArtPiece } from "./types";
+import type { ArtPiece, ArtPieceInfo } from "./types";
 
 const ART_PIECES_URL = "https://example-apis.vercel.app/api/art";
 
@@ -17,6 +17,24 @@ export default function App() {
     ART_PIECES_URL,
     fetcher
   );
+
+  const [artPiecesInfo, setArtPiecesInfo] = useState<ArtPieceInfo[]>([]);
+
+  function isFavorite(slug: string) {
+    return artPiecesInfo.some((info) => info.slug === slug && info.isFavorite);
+  }
+
+  function toggleFavorite(slug: string) {
+    setArtPiecesInfo((infos) =>
+      infos.some((info) => info.slug === slug)
+        ? infos.map((info) =>
+            info.slug === slug
+              ? { ...info, isFavorite: !info.isFavorite }
+              : info
+          )
+        : [...infos, { slug, isFavorite: true }]
+    );
+  }
 
   function withArtPieces(render: (artPieces: ArtPiece[]) => ReactNode) {
     if (error) {
@@ -36,19 +54,31 @@ export default function App() {
           <Route
             path="/"
             element={withArtPieces((pieces) => (
-              <Spotlight artPieces={pieces} />
+              <Spotlight
+                artPieces={pieces}
+                isFavorite={isFavorite}
+                onToggleFavorite={toggleFavorite}
+              />
             ))}
           />
           <Route
             path="/art-pieces"
             element={withArtPieces((pieces) => (
-              <ArtPieces artPieces={pieces} />
+              <ArtPieces
+                artPieces={pieces}
+                isFavorite={isFavorite}
+                onToggleFavorite={toggleFavorite}
+              />
             ))}
           />
           <Route
             path="/art-pieces/:slug"
             element={withArtPieces((pieces) => (
-              <ArtPieceDetails artPieces={pieces} />
+              <ArtPieceDetails
+                artPieces={pieces}
+                isFavorite={isFavorite}
+                onToggleFavorite={toggleFavorite}
+              />
             ))}
           />
           <Route path="*" element={<p>Page not found</p>} />

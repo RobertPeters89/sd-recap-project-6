@@ -29,13 +29,23 @@ function CurrentPath() {
   return <p data-testid="path">{useLocation().pathname}</p>;
 }
 
-function renderDetails(route: string) {
+function renderDetails(
+  route: string,
+  isFavorite: (slug: string) => boolean = () => false,
+  onToggleFavorite: (slug: string) => void = () => {}
+) {
   render(
     <MemoryRouter initialEntries={[route]}>
       <Routes>
         <Route
           path="/art-pieces/:slug"
-          element={<ArtPieceDetails artPieces={artPieces} />}
+          element={
+            <ArtPieceDetails
+              artPieces={artPieces}
+              isFavorite={isFavorite}
+              onToggleFavorite={onToggleFavorite}
+            />
+          }
         />
         <Route path="/art-pieces" element={<CurrentPath />} />
       </Routes>
@@ -81,6 +91,33 @@ describe("ArtPieceDetails", () => {
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
 
     expect(screen.getByTestId("path")).toHaveTextContent("/art-pieces");
+  });
+
+  it("shows a favorite button that is not pressed for a non-favorite", () => {
+    renderDetails("/art-pieces/mona-lisa");
+
+    expect(screen.getByRole("button", { name: "Favorite" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+  });
+
+  it("shows the favorite button as pressed for a favorite", () => {
+    renderDetails("/art-pieces/mona-lisa", (slug) => slug === "mona-lisa");
+
+    expect(screen.getByRole("button", { name: "Favorite" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
+  it("toggles the favorite of the shown art piece", async () => {
+    const onToggleFavorite = vi.fn();
+    renderDetails("/art-pieces/mona-lisa", () => false, onToggleFavorite);
+
+    await userEvent.click(screen.getByRole("button", { name: "Favorite" }));
+
+    expect(onToggleFavorite).toHaveBeenCalledWith("mona-lisa");
   });
 
   it("shows Art piece not found for an unknown slug", () => {
