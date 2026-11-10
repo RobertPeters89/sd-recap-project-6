@@ -1,7 +1,8 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Route, Routes } from "react-router";
 import useSWR from "swr";
 
+import { loadArtPiecesInfo, saveArtPiecesInfo } from "./artPiecesInfoStorage";
 import ArtPieceDetails from "./components/ArtPieceDetails";
 import ArtPieces from "./components/ArtPieces";
 import Navigation from "./components/Navigation";
@@ -18,7 +19,12 @@ export default function App() {
     fetcher
   );
 
-  const [artPiecesInfo, setArtPiecesInfo] = useState<ArtPieceInfo[]>([]);
+  const [artPiecesInfo, setArtPiecesInfo] =
+    useState<ArtPieceInfo[]>(loadArtPiecesInfo);
+
+  useEffect(() => {
+    saveArtPiecesInfo(artPiecesInfo);
+  }, [artPiecesInfo]);
 
   function isFavorite(slug: string) {
     return artPiecesInfo.some((info) => info.slug === slug && info.isFavorite);

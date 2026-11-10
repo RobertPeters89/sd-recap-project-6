@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router";
 import { SWRConfig } from "swr";
 
 import App from "./App";
+import { STORAGE_KEY } from "./artPiecesInfoStorage";
 import type { ArtPiece } from "./types";
 
 const artPieces: ArtPiece[] = [
@@ -625,5 +626,174 @@ describe("App comments", () => {
       screen.getByRole("button", { name: "Favorite The Starry Night" })
     ).toHaveAttribute("aria-pressed", "true");
     expect(commentItems()).toHaveLength(1);
+  });
+});
+
+describe("App persistence", () => {
+  const starryNightButton = { name: "Favorite The Starry Night" };
+  const wheatFieldButton = { name: "Favorite Wheat Field with Cypresses" };
+  const COMMENT_DATE = new Date("2025-03-01T09:15:00.000Z");
+
+  function renderAppAt(route: string) {
+    return render(
+      <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+        <MemoryRouter initialEntries={[route]}>
+          <App />
+        </MemoryRouter>
+      </SWRConfig>
+    );
+  }
+
+  function storedInfo() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
+  }
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+  });
+
+  it("keeps a favorite after a reload", async () => {
+    const { unmount } = renderAppAt("/art-pieces");
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+    unmount();
+
+    renderAppAt("/favorites");
+
+    expect(
+      await screen.findByRole("button", starryNightButton)
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.queryByText("No Favorites marked")).not.toBeInTheDocument();
+  });
+
+  it("keeps a removed favorite removed after a reload", async () => {
+    const { unmount } = renderAppAt("/art-pieces");
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+    await userEvent.click(screen.getByRole("button", starryNightButton));
+    unmount();
+
+    renderAppAt("/favorites");
+
+    expect(await screen.findByText("No Favorites marked")).toBeInTheDocument();
+  });
+
+  it("keeps the comments after a reload, newest first", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(COMMENT_DATE);
+    try {
+      const { unmount } = renderAppAt("/art-pieces/the-starry-night");
+      const input = await screen.findByRole("textbox", { name: "Comment" });
+      await userEvent.type(input, "First impression");
+      await userEvent.click(
+        screen.getByRole("button", { name: "Add comment" })
+      );
+      vi.setSystemTime(new Date("2025-03-02T14:30:00.000Z"));
+      await userEvent.type(input, "Second thought");
+      await userEvent.click(
+        screen.getByRole("button", { name: "Add comment" })
+      );
+      unmount();
+
+      renderAppAt("/art-pieces/the-starry-night");
+
+      const comments = await screen.findByRole("region", { name: "Comments" });
+      const items = within(comments).getAllByRole("listitem");
+      expect(items).toHaveLength(2);
+      expect(items[0]).toHaveTextContent("Second thought");
+      expect(items[0]).toHaveTextContent(
+        new Date("2025-03-02T14:30:00.000Z").toLocaleString()
+      );
+      expect(items[1]).toHaveTextContent("First impression");
+      expect(items[1]).toHaveTextContent(COMMENT_DATE.toLocaleString());
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not show saved comments on another art piece after a reload", async () => {
+    const { unmount } = renderAppAt("/art-pieces/the-starry-night");
+    await userEvent.type(
+      await screen.findByRole("textbox", { name: "Comment" }),
+      "Swirling sky"
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Add comment" }));
+    unmount();
+
+    renderAppAt("/art-pieces/wheat-field-with-cypresses");
+
+    await screen.findByRole("heading", { name: "Wheat Field with Cypresses" });
+    expect(screen.queryByText("Swirling sky")).not.toBeInTheDocument();
+  });
+
+  it("writes favorites and comments to the local storage on every change", async () => {
+    renderAppAt("/art-pieces/the-starry-night");
+
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+    expect(storedInfo()).toEqual([
+      { slug: "the-starry-night", isFavorite: true, comments: [] },
+    ]);
+
+    await userEvent.type(
+      screen.getByRole("textbox", { name: "Comment" }),
+      "Swirling sky"
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Add comment" }));
+    expect(storedInfo()).toEqual([
+      {
+        slug: "the-starry-night",
+        isFavorite: true,
+        comments: [{ text: "Swirling sky", date: expect.any(String) }],
+      },
+    ]);
+  });
+
+  it("shows saved favorites from the local storage on start", async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([
+        { slug: "the-starry-night", isFavorite: true, comments: [] },
+      ])
+    );
+
+    renderAppAt("/art-pieces");
+
+    expect(
+      await screen.findByRole("button", starryNightButton)
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", wheatFieldButton)).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+  });
+
+  it("works without any data in the local storage", async () => {
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+
+    renderAppAt("/art-pieces");
+
+    expect(
+      await screen.findByRole("button", starryNightButton)
+    ).toHaveAttribute("aria-pressed", "false");
+    await userEvent.click(screen.getByRole("button", starryNightButton));
+    expect(screen.getByRole("button", starryNightButton)).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
+  it("works when the local storage contains broken data", async () => {
+    localStorage.setItem(STORAGE_KEY, "{broken");
+
+    renderAppAt("/art-pieces");
+
+    const button = await screen.findByRole("button", starryNightButton);
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    await userEvent.click(button);
+    expect(storedInfo()).toEqual([
+      { slug: "the-starry-night", isFavorite: true, comments: [] },
+    ]);
   });
 });
