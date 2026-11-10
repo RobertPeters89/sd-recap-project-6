@@ -10,6 +10,7 @@ const artPieces: ArtPiece[] = [
       "https://example-apis.vercel.app/assets/art/wheat-field-with-cypresses.jpg",
     year: "1889",
     genre: "Painting",
+    colors: ["#37412E", "#8D7332", "#838665"],
   },
 ];
 
