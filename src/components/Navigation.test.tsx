@@ -49,4 +49,27 @@ describe("Navigation", () => {
       "active"
     );
   });
+
+  it("shows a link labeled Favorites to /favorites", () => {
+    renderNavigation("/");
+
+    expect(screen.getByRole("link", { name: "Favorites" })).toHaveAttribute(
+      "href",
+      "/favorites"
+    );
+  });
+
+  it("highlights the Favorites link on /favorites only", () => {
+    renderNavigation("/favorites");
+
+    expect(screen.getByRole("link", { name: "Favorites" })).toHaveClass(
+      "active"
+    );
+    expect(screen.getByRole("link", { name: "Gallery" })).not.toHaveClass(
+      "active"
+    );
+    expect(screen.getByRole("link", { name: "Spotlight" })).not.toHaveClass(
+      "active"
+    );
+  });
 });
