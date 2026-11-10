@@ -57,6 +57,7 @@
   --nav-height: 4rem;
   --transition: 0.3s ease;
   --flow-duration: 2s;
+  --bg-flow-duration: 18s;
 }
 
 /* ==========================================================================
@@ -81,6 +82,32 @@ body {
   background-image: var(--bg-gradient);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Moving background: the black-to-red bands flow towards the bottom right,
+   the same direction as the gradient. Same colors, same share of both. */
+@media (prefers-reduced-motion: no-preference) {
+  body::before {
+    position: fixed;
+    inset: -100vmax;
+    z-index: -1;
+    pointer-events: none;
+    content: "";
+    background: repeating-linear-gradient(
+      135deg,
+      var(--color-bg-start) 0,
+      var(--color-bg-end) 70.71vmax,
+      var(--color-bg-start) 141.42vmax
+    );
+    animation: flow-bands var(--bg-flow-duration) linear infinite;
+  }
+
+  /* One period is exactly 100vmax to the right and down, so the loop is seamless */
+  @keyframes flow-bands {
+    to {
+      transform: translate(100vmax, 100vmax);
+    }
+  }
 }
 
 main {
@@ -350,6 +377,7 @@ nav a.active {
   max-width: 48rem;
   margin: 0 auto;
   padding: var(--space-md);
+  text-align: center;
   background: var(--card-gradient);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -357,6 +385,7 @@ nav a.active {
 }
 
 .details > button {
+  display: block;
   margin-bottom: var(--space-md);
   padding: 0.5rem 1.1rem;
   color: var(--color-text);
@@ -403,6 +432,7 @@ nav a.active {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
+  justify-content: center;
   margin: var(--space-md) 0 0;
   padding: 0;
   list-style: none;
@@ -450,6 +480,7 @@ nav a.active {
   display: grid;
   gap: var(--space-xs);
   max-width: 28rem;
+  margin-inline: auto;
   margin-top: var(--space-md);
 }
 
