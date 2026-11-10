@@ -53,6 +53,14 @@ describe("ArtPieces", () => {
     expect(screen.getByText("The Starry Night")).toBeInTheDocument();
   });
 
+  it("gives each art piece its position in the list for the staggered flow-in", () => {
+    renderArtPieces();
+
+    screen.getAllByRole("listitem").forEach((item, index) => {
+      expect(item.style.getPropertyValue("--i")).toBe(String(index));
+    });
+  });
+
   it("links each art piece to its detail page", () => {
     renderArtPieces();
 

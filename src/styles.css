@@ -56,6 +56,7 @@
   --max-width: 1200px;
   --nav-height: 4rem;
   --transition: 0.3s ease;
+  --flow-duration: 2s;
 }
 
 /* ==========================================================================
@@ -280,14 +281,20 @@ nav a.active {
 
 /* Fade-in when pieces appear */
 @media (prefers-reduced-motion: no-preference) {
-  .art-piece {
-    animation: fade-up 0.5s ease both;
+  /* Flows in from the top left, like the background fades: piece by piece */
+  .art-piece,
+  .details {
+    animation: fade-up var(--flow-duration) ease both;
+  }
+
+  .art-list .art-piece {
+    animation-delay: min(calc(var(--i, 0) * 80ms), 800ms);
   }
 
   @keyframes fade-up {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translate(-1rem, -1rem);
     }
 
     to {
