@@ -47,3 +47,10 @@ No component or markup changes, and jsdom runs neither animations nor layout, so
 - with emulated reduced motion the layers do not animate;
 - details page: computed `text-align` is `center` for title and paragraphs, the palette is centered, the Back button is on the left.
 Not verifiable here: other browsers, performance on weak devices, how the speed feels.
+
+## Update after review (user feedback)
+The soft red areas made the background clearly redder and took the black away. The user wants black and red to flow like waves or a river in the previous direction (top left to bottom right) without changing the share of the two colors. So the design of the moving background changed:
+- One layer `body::before` (fixed, `inset: -100vmax`, `z-index: -1`) with `repeating-linear-gradient(135deg, start, end, start)`, the same two colors and the same direction as the base gradient; one period is 141.42vmax along the gradient.
+- It moves with `transform: translate(100vmax, 100vmax)` (exactly one period), `linear`, `infinite`, so the loop is seamless and the share of black and red on screen stays the same over time.
+- One variable `--bg-flow-duration: 18s` replaces the two durations of the first design. Still only inside `prefers-reduced-motion: no-preference`.
+- The centered text on the details page is unchanged.
