@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 
 import Navigation from "./Navigation";
@@ -12,6 +12,13 @@ function renderNavigation(route: string) {
 }
 
 describe("Navigation", () => {
+  it("shows all links inside a navigation landmark", () => {
+    renderNavigation("/");
+
+    const navigation = screen.getByRole("navigation");
+    expect(within(navigation).getAllByRole("link")).toHaveLength(3);
+  });
+
   it("shows a link labeled Spotlight to /", () => {
     renderNavigation("/");
 

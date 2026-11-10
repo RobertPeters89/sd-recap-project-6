@@ -15,6 +15,17 @@ const artPiece: ArtPiece = {
 };
 
 describe("ArtPiecePreview", () => {
+  it("shows the image and its caption in one figure", () => {
+    render(<ArtPiecePreview artPiece={artPiece} />);
+
+    const figure = screen.getByRole("figure");
+    expect(figure).toContainElement(
+      screen.getByRole("img", { name: artPiece.name })
+    );
+    expect(figure).toHaveTextContent(artPiece.name);
+    expect(figure).toHaveTextContent(artPiece.artist);
+  });
+
   it("shows the image of the art piece", () => {
     render(<ArtPiecePreview artPiece={artPiece} />);
 
