@@ -449,6 +449,34 @@ describe("App favorites page", () => {
     expect(await screen.findByRole("list")).toBeEmptyDOMElement();
   });
 
+  it("shows No Favorites marked when there are no favorites", async () => {
+    renderApp("/favorites");
+
+    expect(await screen.findByText("No Favorites marked")).toBeInTheDocument();
+  });
+
+  it("does not show No Favorites marked when there is a favorite", async () => {
+    await favoriteInGallery(starryNightButton);
+
+    await screen.findByRole("button", starryNightButton);
+    expect(screen.queryByText("No Favorites marked")).not.toBeInTheDocument();
+  });
+
+  it("shows No Favorites marked after the last favorite is removed", async () => {
+    await favoriteInGallery(starryNightButton);
+
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+
+    expect(screen.getByText("No Favorites marked")).toBeInTheDocument();
+  });
+
+  it("does not show No Favorites marked on the gallery page", async () => {
+    renderApp("/art-pieces");
+
+    await screen.findByRole("list");
+    expect(screen.queryByText("No Favorites marked")).not.toBeInTheDocument();
+  });
+
   it("shows image, title and artist of a favorite art piece", async () => {
     await favoriteInGallery(starryNightButton);
 
