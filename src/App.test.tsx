@@ -266,3 +266,95 @@ describe("App details", () => {
     expect(await screen.findByText("Art piece not found")).toBeInTheDocument();
   });
 });
+
+describe("App favorites", () => {
+  const starryNightButton = { name: "Favorite The Starry Night" };
+  const wheatFieldButton = { name: "Favorite Wheat Field with Cypresses" };
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+  });
+
+  it("marks an art piece as favorite after clicking its button in the list", async () => {
+    renderApp("/art-pieces");
+
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+
+    expect(screen.getByRole("button", starryNightButton)).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(screen.getByRole("button", wheatFieldButton)).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+  });
+
+  it("removes the favorite after clicking the button again", async () => {
+    renderApp("/art-pieces");
+
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+    await userEvent.click(screen.getByRole("button", starryNightButton));
+
+    expect(screen.getByRole("button", starryNightButton)).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+  });
+
+  it("keeps the favorite when navigating from the list to the details", async () => {
+    renderApp("/art-pieces");
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+
+    await userEvent.click(
+      screen.getByRole("link", { name: /The Starry Night/ })
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "The Starry Night" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", starryNightButton)).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
+  it("toggles the favorite on the details page and shows it in the list", async () => {
+    renderApp("/art-pieces/the-starry-night");
+
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(
+      await screen.findByRole("button", starryNightButton)
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", wheatFieldButton)).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+  });
+
+  it("toggles the favorite on the spotlight page and shows it in the list", async () => {
+    vi.spyOn(crypto, "getRandomValues").mockImplementation((array) => {
+      (array as Uint32Array)[0] = 2 ** 32 - 1;
+      return array;
+    });
+    renderApp("/");
+
+    const button = await screen.findByRole("button", starryNightButton);
+    await userEvent.click(button);
+    expect(button).toHaveAttribute("aria-pressed", "true");
+
+    await userEvent.click(screen.getByRole("link", { name: "Gallery" }));
+    expect(
+      await screen.findByRole("button", starryNightButton)
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", wheatFieldButton)).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+  });
+});
