@@ -35,3 +35,7 @@ Existing classes and variables of `src/styles.css` are used (`.art-list`, `.art-
 
 ## Verification
 `npm run check`, `lint`, `format:check`, `test:run`, `coverage`, `build`. Then `npm run dev` in headless Chrome: record frames shortly after switching from Spotlight to Gallery and check that cards appear one by one from top left and that the end state is unchanged. Not verifiable here: other browsers, reduced-motion setting on a real system (it can be emulated in headless Chrome and will be, if possible), feel of the timing. Screenshots and scripts go to the scratchpad and are reported.
+
+## Update after review (user feedback)
+- The flow-in is 1.5 seconds slower: one shared variable `--flow-duration: 2s` (was 0.5s) in the variables section of `src/styles.css`.
+- It also applies to the details page (`.details`, with image, texts, palette and comments), with the same `fade-up` from the top left and no stagger. This replaces the "Details page animation" item under "Out of scope".
