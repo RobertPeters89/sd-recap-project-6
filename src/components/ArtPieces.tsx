@@ -16,7 +16,7 @@ export default function ArtPieces({
   onToggleFavorite,
 }: ArtPiecesProps) {
   return (
-    <ul>
+    <ul className="art-list">
       {artPieces.map((artPiece) => (
         <li key={artPiece.slug} className="art-piece">
           <Link to={`/art-pieces/${artPiece.slug}`}>
