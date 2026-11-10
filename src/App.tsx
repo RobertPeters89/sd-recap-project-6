@@ -8,7 +8,7 @@ import Navigation from "./components/Navigation";
 import Spotlight from "./components/Spotlight";
 import { fetcher } from "./fetcher";
 import "./styles.css";
-import type { ArtPiece, ArtPieceInfo } from "./types";
+import type { ArtPiece, ArtPieceComment, ArtPieceInfo } from "./types";
 
 const ART_PIECES_URL = "https://example-apis.vercel.app/api/art";
 
@@ -32,7 +32,24 @@ export default function App() {
               ? { ...info, isFavorite: !info.isFavorite }
               : info
           )
-        : [...infos, { slug, isFavorite: true }]
+        : [...infos, { slug, isFavorite: true, comments: [] }]
+    );
+  }
+
+  function getComments(slug: string): ArtPieceComment[] {
+    return artPiecesInfo.find((info) => info.slug === slug)?.comments ?? [];
+  }
+
+  function addComment(slug: string, text: string) {
+    const comment = { text, date: new Date().toISOString() };
+    setArtPiecesInfo((infos) =>
+      infos.some((info) => info.slug === slug)
+        ? infos.map((info) =>
+            info.slug === slug
+              ? { ...info, comments: [comment, ...info.comments] }
+              : info
+          )
+        : [...infos, { slug, isFavorite: false, comments: [comment] }]
     );
   }
 
@@ -78,6 +95,8 @@ export default function App() {
                 artPieces={pieces}
                 isFavorite={isFavorite}
                 onToggleFavorite={toggleFavorite}
+                getComments={getComments}
+                onAddComment={addComment}
               />
             ))}
           />

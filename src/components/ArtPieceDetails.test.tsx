@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 
-import type { ArtPiece } from "../types";
+import type { ArtPiece, ArtPieceComment } from "../types";
 import ArtPieceDetails from "./ArtPieceDetails";
 
 const artPieces: ArtPiece[] = [
@@ -32,7 +32,9 @@ function CurrentPath() {
 function renderDetails(
   route: string,
   isFavorite: (slug: string) => boolean = () => false,
-  onToggleFavorite: (slug: string) => void = () => {}
+  onToggleFavorite: (slug: string) => void = () => {},
+  getComments: (slug: string) => ArtPieceComment[] = () => [],
+  onAddComment: (slug: string, text: string) => void = () => {}
 ) {
   render(
     <MemoryRouter initialEntries={[route]}>
@@ -44,6 +46,8 @@ function renderDetails(
               artPieces={artPieces}
               isFavorite={isFavorite}
               onToggleFavorite={onToggleFavorite}
+              getComments={getComments}
+              onAddComment={onAddComment}
             />
           }
         />
@@ -130,6 +134,47 @@ describe("ArtPieceDetails", () => {
     );
 
     expect(onToggleFavorite).toHaveBeenCalledWith("mona-lisa");
+  });
+
+  it("shows the comments section with the comments of the art piece", () => {
+    renderDetails("/art-pieces/mona-lisa", undefined, undefined, (slug) =>
+      slug === "mona-lisa"
+        ? [{ text: "Mysterious smile", date: "2025-03-01T09:15:00.000Z" }]
+        : []
+    );
+
+    const section = screen.getByRole("region", { name: "Comments" });
+    expect(section).toHaveTextContent("Mysterious smile");
+  });
+
+  it("shows the comment form", () => {
+    renderDetails("/art-pieces/mona-lisa");
+
+    expect(
+      screen.getByRole("textbox", { name: "Comment" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Add comment" })
+    ).toBeInTheDocument();
+  });
+
+  it("adds a comment for the shown art piece", async () => {
+    const onAddComment = vi.fn();
+    renderDetails(
+      "/art-pieces/mona-lisa",
+      undefined,
+      undefined,
+      undefined,
+      onAddComment
+    );
+
+    await userEvent.type(
+      screen.getByRole("textbox", { name: "Comment" }),
+      "Mysterious smile"
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Add comment" }));
+
+    expect(onAddComment).toHaveBeenCalledWith("mona-lisa", "Mysterious smile");
   });
 
   it("shows Art piece not found for an unknown slug", () => {
