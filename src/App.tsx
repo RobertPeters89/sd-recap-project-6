@@ -81,6 +81,16 @@ export default function App() {
               />
             ))}
           />
+          <Route
+            path="/favorites"
+            element={withArtPieces((pieces) => (
+              <ArtPieces
+                artPieces={pieces.filter((piece) => isFavorite(piece.slug))}
+                isFavorite={isFavorite}
+                onToggleFavorite={toggleFavorite}
+              />
+            ))}
+          />
           <Route path="*" element={<p>Page not found</p>} />
         </Routes>
       </main>

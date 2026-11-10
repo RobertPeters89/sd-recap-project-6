@@ -358,3 +358,109 @@ describe("App favorites", () => {
     );
   });
 });
+
+describe("App favorites page", () => {
+  const starryNightButton = { name: "Favorite The Starry Night" };
+  const wheatFieldButton = { name: "Favorite Wheat Field with Cypresses" };
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => artPieces })
+    );
+  });
+
+  async function favoriteInGallery(...buttons: { name: string }[]) {
+    renderApp("/art-pieces");
+    for (const button of buttons) {
+      await userEvent.click(await screen.findByRole("button", button));
+    }
+    await userEvent.click(screen.getByRole("link", { name: "Favorites" }));
+  }
+
+  it("shows the favorites page after clicking Favorites", async () => {
+    renderApp("/");
+    await screen.findByRole("img");
+
+    await userEvent.click(screen.getByRole("link", { name: "Favorites" }));
+
+    expect(await screen.findByRole("list")).toBeInTheDocument();
+    expect(screen.queryByRole("figure")).not.toBeInTheDocument();
+  });
+
+  it("shows a loading message on /favorites while loading", () => {
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+
+    renderApp("/favorites");
+
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+  });
+
+  it("shows an error message on /favorites when loading fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+
+    renderApp("/favorites");
+
+    expect(
+      await screen.findByText("Failed to load art pieces.")
+    ).toBeInTheDocument();
+  });
+
+  it("shows all favorite art pieces in a list in the order of the data", async () => {
+    await favoriteInGallery(starryNightButton, wheatFieldButton);
+
+    const items = await screen.findAllByRole("listitem");
+    expect(items).toHaveLength(2);
+    expect(items[0]).toHaveTextContent("Wheat Field with Cypresses");
+    expect(items[1]).toHaveTextContent("The Starry Night");
+  });
+
+  it("shows only the favorite art pieces", async () => {
+    await favoriteInGallery(starryNightButton);
+
+    expect(await screen.findAllByRole("listitem")).toHaveLength(1);
+    expect(screen.getByText("The Starry Night")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Wheat Field with Cypresses")
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows an empty list when there are no favorites", async () => {
+    renderApp("/favorites");
+
+    expect(await screen.findByRole("list")).toBeEmptyDOMElement();
+  });
+
+  it("shows image, title and artist of a favorite art piece", async () => {
+    await favoriteInGallery(starryNightButton);
+
+    const image = await screen.findByRole("img", { name: "The Starry Night" });
+    expect(image).toHaveAttribute("src", artPieces[1].imageSource);
+    expect(
+      screen.getByRole("heading", { name: "The Starry Night" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Vincent van Gogh")).toBeInTheDocument();
+  });
+
+  it("shows an active favorite button on each favorite art piece", async () => {
+    await favoriteInGallery(starryNightButton, wheatFieldButton);
+
+    expect(
+      await screen.findByRole("button", starryNightButton)
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", wheatFieldButton)).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
+  it("removes an art piece from the page when its favorite button is clicked", async () => {
+    await favoriteInGallery(starryNightButton, wheatFieldButton);
+
+    await userEvent.click(await screen.findByRole("button", starryNightButton));
+
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.queryByText("The Starry Night")).not.toBeInTheDocument();
+    expect(screen.getByText("Wheat Field with Cypresses")).toBeInTheDocument();
+  });
+});
