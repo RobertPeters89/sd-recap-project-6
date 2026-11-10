@@ -94,10 +94,9 @@ describe("Spotlight", () => {
 
     renderSpotlight();
 
-    expect(screen.getByRole("button", { name: "Favorite" })).toHaveAttribute(
-      "aria-pressed",
-      "false"
-    );
+    expect(
+      screen.getByRole("button", { name: "Favorite Mona Lisa" })
+    ).toHaveAttribute("aria-pressed", "false");
   });
 
   it("shows the favorite button as pressed for a favorite", () => {
@@ -105,10 +104,9 @@ describe("Spotlight", () => {
 
     renderSpotlight((slug) => slug === "mona-lisa");
 
-    expect(screen.getByRole("button", { name: "Favorite" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(
+      screen.getByRole("button", { name: "Favorite Mona Lisa" })
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("places the favorite button in the positioned figure", () => {
@@ -118,7 +116,7 @@ describe("Spotlight", () => {
 
     expect(screen.getByRole("figure")).toHaveClass("art-piece");
     expect(screen.getByRole("figure")).toContainElement(
-      screen.getByRole("button", { name: "Favorite" })
+      screen.getByRole("button", { name: "Favorite Mona Lisa" })
     );
   });
 
@@ -127,7 +125,9 @@ describe("Spotlight", () => {
     const onToggleFavorite = vi.fn();
     renderSpotlight(() => false, onToggleFavorite);
 
-    await userEvent.click(screen.getByRole("button", { name: "Favorite" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Favorite Mona Lisa" })
+    );
 
     expect(onToggleFavorite).toHaveBeenCalledWith("mona-lisa");
   });

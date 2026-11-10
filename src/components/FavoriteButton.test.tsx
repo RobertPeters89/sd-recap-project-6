@@ -3,37 +3,40 @@ import userEvent from "@testing-library/user-event";
 
 import FavoriteButton from "./FavoriteButton";
 
+function renderButton(isFavorite: boolean, onToggle: () => void = () => {}) {
+  render(
+    <FavoriteButton
+      artPieceName="Mona Lisa"
+      isFavorite={isFavorite}
+      onToggle={onToggle}
+    />
+  );
+  return screen.getByRole("button", { name: "Favorite Mona Lisa" });
+}
+
 describe("FavoriteButton", () => {
-  it("shows a button that is not pressed for a non-favorite", () => {
-    render(<FavoriteButton isFavorite={false} onToggle={() => {}} />);
-
-    expect(screen.getByRole("button", { name: "Favorite" })).toHaveAttribute(
-      "aria-pressed",
-      "false"
-    );
+  it("names the button after the art piece", () => {
+    expect(renderButton(false)).toBeInTheDocument();
   });
 
-  it("shows a pressed and highlighted button for a favorite", () => {
-    render(<FavoriteButton isFavorite onToggle={() => {}} />);
+  it("shows an unpressed button with an outlined heart for a non-favorite", () => {
+    const button = renderButton(false);
 
-    const button = screen.getByRole("button", { name: "Favorite" });
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    expect(button.querySelector("svg")).toHaveAttribute("fill", "none");
+  });
+
+  it("shows a pressed button with a filled heart for a favorite", () => {
+    const button = renderButton(true);
+
     expect(button).toHaveAttribute("aria-pressed", "true");
-    expect(button).toHaveClass("favorite");
-  });
-
-  it("does not highlight a non-favorite", () => {
-    render(<FavoriteButton isFavorite={false} onToggle={() => {}} />);
-
-    expect(screen.getByRole("button", { name: "Favorite" })).not.toHaveClass(
-      "favorite"
-    );
+    expect(button.querySelector("svg")).toHaveAttribute("fill", "currentColor");
   });
 
   it("calls onToggle when clicked", async () => {
     const onToggle = vi.fn();
-    render(<FavoriteButton isFavorite={false} onToggle={onToggle} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Favorite" }));
+    await userEvent.click(renderButton(false, onToggle));
 
     expect(onToggle).toHaveBeenCalledTimes(1);
   });

@@ -23,6 +23,7 @@ export default function ArtPieces({
             <ArtPiecePreview artPiece={artPiece} />
           </Link>
           <FavoriteButton
+            artPieceName={artPiece.name}
             isFavorite={isFavorite(artPiece.slug)}
             onToggle={() => onToggleFavorite(artPiece.slug)}
           />

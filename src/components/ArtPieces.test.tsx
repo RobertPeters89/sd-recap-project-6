@@ -66,15 +66,27 @@ describe("ArtPieces", () => {
   it("shows a favorite button for each art piece", () => {
     renderArtPieces();
 
-    expect(screen.getAllByRole("button", { name: "Favorite" })).toHaveLength(2);
+    expect(
+      screen.getByRole("button", {
+        name: "Favorite Wheat Field with Cypresses",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Favorite The Starry Night" })
+    ).toBeInTheDocument();
   });
 
   it("marks only the favorite art pieces as pressed", () => {
     renderArtPieces((slug) => slug === "the-starry-night");
 
-    const buttons = screen.getAllByRole("button", { name: "Favorite" });
-    expect(buttons[0]).toHaveAttribute("aria-pressed", "false");
-    expect(buttons[1]).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", {
+        name: "Favorite Wheat Field with Cypresses",
+      })
+    ).toHaveAttribute("aria-pressed", "false");
+    expect(
+      screen.getByRole("button", { name: "Favorite The Starry Night" })
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("toggles the favorite of the clicked art piece", async () => {
@@ -82,7 +94,7 @@ describe("ArtPieces", () => {
     renderArtPieces(() => false, onToggleFavorite);
 
     await userEvent.click(
-      screen.getAllByRole("button", { name: "Favorite" })[1]
+      screen.getByRole("button", { name: "Favorite The Starry Night" })
     );
 
     expect(onToggleFavorite).toHaveBeenCalledWith("the-starry-night");
@@ -91,7 +103,7 @@ describe("ArtPieces", () => {
   it("places the favorite button in the positioned container of its art piece", () => {
     renderArtPieces();
 
-    for (const button of screen.getAllByRole("button", { name: "Favorite" })) {
+    for (const button of screen.getAllByRole("button", { name: /^Favorite/ })) {
       expect(button.closest("li")).toHaveClass("art-piece");
     }
   });

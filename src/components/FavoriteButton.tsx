@@ -1,19 +1,21 @@
 import { Heart } from "lucide-react";
 
 interface FavoriteButtonProps {
+  artPieceName: string;
   isFavorite: boolean;
   onToggle: () => void;
 }
 
 export default function FavoriteButton({
+  artPieceName,
   isFavorite,
   onToggle,
 }: FavoriteButtonProps) {
   return (
     <button
       type="button"
-      className={isFavorite ? "favorite-button favorite" : "favorite-button"}
-      aria-label="Favorite"
+      className="favorite-button"
+      aria-label={`Favorite ${artPieceName}`}
       aria-pressed={isFavorite}
       onClick={onToggle}
     >

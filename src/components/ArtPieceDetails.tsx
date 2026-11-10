@@ -30,6 +30,7 @@ export default function ArtPieceDetails({
       <div className="details-image">
         <img src={artPiece.imageSource} alt={artPiece.name} />
         <FavoriteButton
+          artPieceName={artPiece.name}
           isFavorite={isFavorite(artPiece.slug)}
           onToggle={() => onToggleFavorite(artPiece.slug)}
         />

@@ -96,26 +96,24 @@ describe("ArtPieceDetails", () => {
   it("shows a favorite button that is not pressed for a non-favorite", () => {
     renderDetails("/art-pieces/mona-lisa");
 
-    expect(screen.getByRole("button", { name: "Favorite" })).toHaveAttribute(
-      "aria-pressed",
-      "false"
-    );
+    expect(
+      screen.getByRole("button", { name: "Favorite Mona Lisa" })
+    ).toHaveAttribute("aria-pressed", "false");
   });
 
   it("shows the favorite button as pressed for a favorite", () => {
     renderDetails("/art-pieces/mona-lisa", (slug) => slug === "mona-lisa");
 
-    expect(screen.getByRole("button", { name: "Favorite" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(
+      screen.getByRole("button", { name: "Favorite Mona Lisa" })
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("places the favorite button next to the image in a positioned container", () => {
     renderDetails("/art-pieces/mona-lisa");
 
     const container = screen.getByRole("button", {
-      name: "Favorite",
+      name: "Favorite Mona Lisa",
     }).parentElement;
     expect(container).toHaveClass("details-image");
     expect(container).toContainElement(
@@ -127,7 +125,9 @@ describe("ArtPieceDetails", () => {
     const onToggleFavorite = vi.fn();
     renderDetails("/art-pieces/mona-lisa", () => false, onToggleFavorite);
 
-    await userEvent.click(screen.getByRole("button", { name: "Favorite" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Favorite Mona Lisa" })
+    );
 
     expect(onToggleFavorite).toHaveBeenCalledWith("mona-lisa");
   });

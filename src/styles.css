@@ -90,6 +90,11 @@ nav a.active {
   border-radius: 50%;
 }
 
+.favorite-button:focus-visible {
+  outline: 2px solid #d6336c;
+  outline-offset: 2px;
+}
+
 .favorite-button[aria-pressed="true"] {
   color: #d6336c;
 }
