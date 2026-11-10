@@ -22,7 +22,7 @@ export default function Spotlight({
   }
 
   return (
-    <figure>
+    <figure className="art-piece spotlight">
       <img src={artPiece.imageSource} alt={artPiece.name} />
       <FavoriteButton
         isFavorite={isFavorite(artPiece.slug)}

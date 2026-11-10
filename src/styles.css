@@ -53,6 +53,10 @@ nav a.active {
   margin: 0;
 }
 
+.art-piece figure {
+  margin: 0;
+}
+
 .art-piece img {
   display: block;
   width: 100%;
@@ -88,6 +92,10 @@ nav a.active {
 
 .favorite-button[aria-pressed="true"] {
   color: #d6336c;
+}
+
+.details-image {
+  position: relative;
 }
 
 .details img {

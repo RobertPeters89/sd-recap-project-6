@@ -88,6 +88,14 @@ describe("ArtPieces", () => {
     expect(onToggleFavorite).toHaveBeenCalledWith("the-starry-night");
   });
 
+  it("places the favorite button in the positioned container of its art piece", () => {
+    renderArtPieces();
+
+    for (const button of screen.getAllByRole("button", { name: "Favorite" })) {
+      expect(button.closest("li")).toHaveClass("art-piece");
+    }
+  });
+
   it("does not put the favorite button inside the link", () => {
     renderArtPieces();
 

@@ -18,7 +18,7 @@ export default function ArtPieces({
   return (
     <ul>
       {artPieces.map((artPiece) => (
-        <li key={artPiece.slug}>
+        <li key={artPiece.slug} className="art-piece">
           <Link to={`/art-pieces/${artPiece.slug}`}>
             <ArtPiecePreview artPiece={artPiece} />
           </Link>

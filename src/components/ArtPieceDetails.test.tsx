@@ -111,6 +111,18 @@ describe("ArtPieceDetails", () => {
     );
   });
 
+  it("places the favorite button next to the image in a positioned container", () => {
+    renderDetails("/art-pieces/mona-lisa");
+
+    const container = screen.getByRole("button", {
+      name: "Favorite",
+    }).parentElement;
+    expect(container).toHaveClass("details-image");
+    expect(container).toContainElement(
+      screen.getByRole("img", { name: "Mona Lisa" })
+    );
+  });
+
   it("toggles the favorite of the shown art piece", async () => {
     const onToggleFavorite = vi.fn();
     renderDetails("/art-pieces/mona-lisa", () => false, onToggleFavorite);

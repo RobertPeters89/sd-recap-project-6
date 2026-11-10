@@ -27,11 +27,13 @@ export default function ArtPieceDetails({
       <button type="button" onClick={() => navigate("/art-pieces")}>
         Back
       </button>
-      <img src={artPiece.imageSource} alt={artPiece.name} />
-      <FavoriteButton
-        isFavorite={isFavorite(artPiece.slug)}
-        onToggle={() => onToggleFavorite(artPiece.slug)}
-      />
+      <div className="details-image">
+        <img src={artPiece.imageSource} alt={artPiece.name} />
+        <FavoriteButton
+          isFavorite={isFavorite(artPiece.slug)}
+          onToggle={() => onToggleFavorite(artPiece.slug)}
+        />
+      </div>
       <h2>{artPiece.name}</h2>
       <p>{artPiece.artist}</p>
       <p>{artPiece.year}</p>

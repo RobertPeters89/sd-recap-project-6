@@ -111,6 +111,17 @@ describe("Spotlight", () => {
     );
   });
 
+  it("places the favorite button in the positioned figure", () => {
+    mockRandomValue(MAX_RANDOM_VALUE);
+
+    renderSpotlight();
+
+    expect(screen.getByRole("figure")).toHaveClass("art-piece");
+    expect(screen.getByRole("figure")).toContainElement(
+      screen.getByRole("button", { name: "Favorite" })
+    );
+  });
+
   it("toggles the favorite of the selected art piece", async () => {
     mockRandomValue(MAX_RANDOM_VALUE);
     const onToggleFavorite = vi.fn();
