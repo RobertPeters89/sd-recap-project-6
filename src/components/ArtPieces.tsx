@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Link } from "react-router";
 
 import type { ArtPiece } from "../types";
@@ -17,8 +18,12 @@ export default function ArtPieces({
 }: ArtPiecesProps) {
   return (
     <ul className="art-list">
-      {artPieces.map((artPiece) => (
-        <li key={artPiece.slug} className="art-piece">
+      {artPieces.map((artPiece, index) => (
+        <li
+          key={artPiece.slug}
+          className="art-piece"
+          style={{ "--i": index } as CSSProperties}
+        >
           <Link to={`/art-pieces/${artPiece.slug}`}>
             <ArtPiecePreview artPiece={artPiece} />
           </Link>
