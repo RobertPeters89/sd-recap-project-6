@@ -2,7 +2,7 @@ interface ColorPaletteProps {
   colors: string[];
 }
 
-export default function ColorPalette({ colors }: ColorPaletteProps) {
+export default function ColorPalette({ colors }: Readonly<ColorPaletteProps>) {
   return (
     <ul className="palette" aria-label="Color palette">
       {colors.map((color, index) => (

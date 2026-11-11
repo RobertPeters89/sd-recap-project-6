@@ -4,7 +4,9 @@ interface ArtPiecePreviewProps {
   artPiece: ArtPiece;
 }
 
-export default function ArtPiecePreview({ artPiece }: ArtPiecePreviewProps) {
+export default function ArtPiecePreview({
+  artPiece,
+}: Readonly<ArtPiecePreviewProps>) {
   return (
     <figure>
       <img src={artPiece.imageSource} alt={artPiece.name} />

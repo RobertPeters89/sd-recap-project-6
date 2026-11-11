@@ -15,7 +15,7 @@ export default function ArtPieces({
   artPieces,
   isFavorite,
   onToggleFavorite,
-}: ArtPiecesProps) {
+}: Readonly<ArtPiecesProps>) {
   return (
     <ul className="art-list">
       {artPieces.map((artPiece, index) => (
