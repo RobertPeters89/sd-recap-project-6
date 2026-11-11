@@ -4,7 +4,7 @@ interface CommentsProps {
   comments: ArtPieceComment[];
 }
 
-export default function Comments({ comments }: CommentsProps) {
+export default function Comments({ comments }: Readonly<CommentsProps>) {
   return (
     <section aria-labelledby="comments-heading">
       <h3 id="comments-heading">Comments</h3>

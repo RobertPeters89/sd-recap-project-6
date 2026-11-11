@@ -4,7 +4,9 @@ interface CommentFormProps {
   onAddComment: (text: string) => void;
 }
 
-export default function CommentForm({ onAddComment }: CommentFormProps) {
+export default function CommentForm({
+  onAddComment,
+}: Readonly<CommentFormProps>) {
   const [text, setText] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

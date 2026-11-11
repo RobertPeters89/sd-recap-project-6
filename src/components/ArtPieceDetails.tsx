@@ -20,7 +20,7 @@ export default function ArtPieceDetails({
   onToggleFavorite,
   getComments,
   onAddComment,
-}: ArtPieceDetailsProps) {
+}: Readonly<ArtPieceDetailsProps>) {
   const { slug } = useParams();
   const navigate = useNavigate();
   const artPiece = artPieces.find((piece) => piece.slug === slug);

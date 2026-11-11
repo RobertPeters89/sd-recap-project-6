@@ -14,7 +14,7 @@ export default function Spotlight({
   artPieces,
   isFavorite,
   onToggleFavorite,
-}: SpotlightProps) {
+}: Readonly<SpotlightProps>) {
   const [artPiece] = useState(() => getRandomArtPiece(artPieces));
 
   if (!artPiece) {

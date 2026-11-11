@@ -10,7 +10,7 @@ export default function FavoriteButton({
   artPieceName,
   isFavorite,
   onToggle,
-}: FavoriteButtonProps) {
+}: Readonly<FavoriteButtonProps>) {
   return (
     <button
       type="button"
